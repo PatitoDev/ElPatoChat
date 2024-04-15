@@ -20,3 +20,44 @@ export interface ChatMessageData {
   }>,
   contentParts: Array<MessagePart>,
 }
+
+export interface TTSReplacement {
+  id: string,
+  ordinal: number,
+  regex: string,
+  regexFlags: string,
+  replaceWith: string,
+  replaceFullMessage?: boolean,
+  replacement?: TTSReplacement,
+  description: string
+}
+
+export interface TTSConfiguration {
+  selectedVoice?: string,
+  userReplacement: Array<TTSReplacement>,
+  replacements: Array<TTSReplacement>,
+  ignoredUsers: Array<{
+    id: string,
+    userName: string
+  }>
+}
+
+export interface UserConfiguration {
+  isTTSEnabled: boolean,
+  chatDirection: 'left' | 'right',
+  betterTTVEnabled: boolean,
+  frankerFaceEnabled: boolean,
+  sevenTVEnabled: boolean,
+  ignoredUsers: Array<{
+    id: string,
+    value: string
+  }>
+  ttsConfiguration: TTSConfiguration,
+}
+
+export interface TTSMessage {
+  id: string,
+  parts: Array<MessagePart>,
+  content: string,
+  sentBy?: string,
+}

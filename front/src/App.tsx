@@ -28,10 +28,10 @@ const App = () => {
       setError('Unexpected error');
     };
 
-    onHashChange();
-    window.addEventListener('hashchange', onHashChange);
+    //onHashChange();
+    //window.addEventListener('hashchange', onHashChange);
     return () => {
-      window.removeEventListener('hashchange', onHashChange);
+      //window.removeEventListener('hashchange', onHashChange);
     };
   }, []);
 
@@ -40,7 +40,7 @@ const App = () => {
       <GlobalStyle/>
       { error && (<h1>Error</h1>) }
       { channel && (<ChatOverlay userInformation={channel} />) }
-      { (!location.hash.replace('#', '')) && ( <HomePage /> ) }
+      { ( <HomePage /> ) }
     </>
   );
 };

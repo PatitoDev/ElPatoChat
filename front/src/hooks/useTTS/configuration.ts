@@ -1,35 +1,6 @@
-import { TTSConfiguration, TTSMessage, TTSReplacement } from '../useTTS';
+import { TTSConfiguration, TTSMessage, TTSReplacement } from '../../types';
 
-export const ttsDefaultConfig: TTSConfiguration = {
-  selectedVoice: 'Microsoft Sabina - Spanish (Mexico)',
-  userReplacement: [
-    { regex: 'ckmu32', replaceWith: 'cristi' },
-    { regex: 'bulbsum', replaceWith: 'bulbi' },
-    { regex: 'guerra24_', replaceWith: 'lili' },
-    { regex: 'ssmatiuri', replaceWith: 'matilda' },
-  ],
-  replacements: [
-    { regex: '\\*quack\\*', regexFlags: 'gi', replaceWith: '' },
-    { regex: '[g|j]+h*a+h*n+h*( ?)+[szx]+( ?)+o+', regexFlags: 'gi', replaceWith: 'pato' },
-    { regex: 'cks+[o|ó|O|Ó]', regexFlags: 'gi', replaceWith: 'se caso' },
-    { regex: '[\\uD83C-\\uFFFF]', regexFlags: 'g', replaceWith: '' },
-    { regex: '_*', regexFlags: 'g', replaceWith: '' },
-    { regex: '\\bck\\b', regexFlags: 'gi', replaceWith: 'cristi' },
-    { regex: '\\bckmu\\b', regexFlags: 'gi',  replaceWith: 'cristi' },
 
-    { regex: '[0-9a-zA-z]\\.[a-zA-Z][a-zA-Z]', replaceFullMessage: true, replaceWith: '$who a enviado un link.' },
-    { regex: '^\\*.+\\*$', replaceWith: '$who $msg', replaceFullMessage: true,
-      replacement: {
-        regex: '\\*', regexFlags: 'gi', replaceWith: ''
-      }
-    },
-  ]
-};
-
-export enum TTSMessageReplaceMentTokens {
-  who = '$who',
-  msg = '$msg'
-}
 
 export const applyTTSMessageTransformations = (message: TTSMessage, configuration: TTSConfiguration) => {
   const emotesToRead = 1;

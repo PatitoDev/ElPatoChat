@@ -1,32 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { applyTTSMessageTransformations } from './useTwitchChat/configuration';
-import { MessagePart } from '../types';
+import { applyTTSMessageTransformations } from './configuration';
+import { TTSMessage } from '../../types';
+import { useConfiguration } from '../../store/configuration';
+import { useTtsVoices } from '../../store/ttsVoices';
 
-export interface TTSReplacement {
-  regex: string,
-  regexFlags?: string,
-  replaceWith: string,
-  replaceFullMessage?: boolean,
-  replacement?: TTSReplacement,
-}
 
-export interface TTSConfiguration {
-  selectedVoice?: string,
-  userReplacement: Array<TTSReplacement>,
-  replacements: Array<TTSReplacement>,
-}
-
-export interface TTSMessage {
-  id: string,
-  parts: Array<MessagePart>,
-  content: string,
-  sentBy?: string,
-}
-
-export const useTTS = (configuration: TTSConfiguration) => {
+export const useTTS = () => {
+  const configuration = useConfiguration(state => state.ttsConfiguration);
   const [messagesToRead, setMessagesToRead] = useState<Array<TTSMessage>>([]);
   const [currentMessageId, setCurrentMessageId] = useState<string | null>(null);
-  const [voices, setVoices] = useState<Array<SpeechSynthesisVoice>>([]);
+  const { setVoices, voices } = useTtsVoices(state => state);
 
   useEffect(() => {
     if (typeof speechSynthesis === 'undefined') {
@@ -46,7 +29,7 @@ export const useTTS = (configuration: TTSConfiguration) => {
     return () => {
       speechSynthesis.removeEventListener('voiceschanged', onVoicesChange);
     };
-  }, []);
+  }, [setVoices]);
 
   const speakInternal = useCallback((message: TTSMessage, onEnd: () => void) => {
     // parse

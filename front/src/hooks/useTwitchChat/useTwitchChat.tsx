@@ -7,21 +7,21 @@ import { useBadges } from '../useBadges';
 import { UserInformation } from '../../api/elpatoApi/types';
 import { TwitchChatParser } from './twitchChatParser';
 import { useCustomEmotes } from '../useCustomEmotes';
-import { useTTS } from '../useTTS';
-import { ttsDefaultConfig } from './configuration';
+import { useTTS } from '../useTTS/useTTS';
+import { useConfiguration } from '../../store/configuration';
 
 const MAX_MESSAGES = 20;
-// TODO - move to config
-const IGNORED_USERS = ['el_pato_bot', 'nightbot', 'ckmu_bot', 'streamelements'];
 
 type OnChatMessageEventHandler = (channel: string, user:string, text:string, msg: TwurpleChatMessage) => Promise<void>;
 
 export const useTwitchChat = (channel: UserInformation) => {
+  const configuration = useConfiguration(state => state);
+
   const { 
     clearQueue: ttsClearQueue,
     onRemoveMessage: ttsRemoveMessage,
     speak: ttsSpeak
-  } = useTTS(ttsDefaultConfig);
+  } = useTTS();
   const customEmotes = useCustomEmotes(channel.id);
   const { parseBadges } = useBadges(channel.id);
   const { getPronounsFromTwitchName } = usePronouns();
@@ -50,7 +50,6 @@ export const useTwitchChat = (channel: UserInformation) => {
     if (!chat) return;
     chat.onMessage(async (channel: string, user: string, text: string, msg: TwurpleChatMessage) => {
       if (!onMessageHandlerRef.current) return;
-      if (IGNORED_USERS.includes(user)) return;
       await onMessageHandlerRef.current(channel, user, text, msg);
     });
 
@@ -59,6 +58,12 @@ export const useTwitchChat = (channel: UserInformation) => {
         onChatClearRef.current();
       }
       setChatMessages([]);
+    });
+
+    chat.onTimeout((channel, user) => {
+      setChatMessages(prev => prev.filter(item => (
+        item.userDisplayName.toLowerCase() !== user
+      )));
     });
 
     chat.onMessageRemove((channel: string, messageId: string) => {
@@ -71,6 +76,7 @@ export const useTwitchChat = (channel: UserInformation) => {
 
   useEffect(() => {
     onMessageHandlerRef.current = async (channel: string, user: string, text: string, msg: TwurpleChatMessage) => {
+      if (configuration.ignoredUsers.find(ignoredUser => ignoredUser.value === user)) return;
       const pronoun = await getPronounsFromTwitchName(user);
       const msgParts = TwitchChatParser.parseMessage(msg.text, msg.emoteOffsets, customEmotes, msg);
 
@@ -84,26 +90,29 @@ export const useTwitchChat = (channel: UserInformation) => {
         badges: parseBadges(msg.userInfo.badges),
         contentParts: msgParts
       };
-      console.log(msgParts);
 
-      ttsSpeak({
-        parts: msgParts,
-        content: newMessage.content,
-        id: newMessage.id,
-        sentBy: newMessage.userDisplayName
-      });
+      if (configuration.isTTSEnabled) {
+        ttsSpeak({
+          parts: msgParts,
+          content: newMessage.content,
+          id: newMessage.id,
+          sentBy: newMessage.userDisplayName
+        });
+      }
 
       setChatMessages((msgs) => (
         [newMessage, ...msgs].slice(0, MAX_MESSAGES)
       ));
     };
-  }, [getPronounsFromTwitchName, parseBadges, customEmotes, ttsSpeak]);
+  }, [getPronounsFromTwitchName, parseBadges, customEmotes, ttsSpeak, configuration]);
 
   useEffect(() => {
     onMessageRemovedRef.current = (msgId: string) => {
-      ttsRemoveMessage([msgId]);
+      if (configuration.isTTSEnabled) {
+        ttsRemoveMessage([msgId]);
+      }
     };
-  }, [ttsRemoveMessage]);
+  }, [ttsRemoveMessage, configuration]);
 
   useEffect(() => {
     onChatClearRef.current = ttsClearQueue;
