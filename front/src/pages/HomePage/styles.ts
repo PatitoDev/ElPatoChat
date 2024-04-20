@@ -9,6 +9,11 @@ export const Page = styled.div`
   overflow-y: hidden;
 `;
 
+export const Info = styled.div`
+  color: #eee1b4;
+  margin-top: 1em;
+`;
+
 export const ChatContainer = styled.div`
   display: flex;
   justify-content: center;

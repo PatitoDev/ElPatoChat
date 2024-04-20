@@ -43,6 +43,8 @@ export interface TTSConfiguration {
 }
 
 export interface UserConfiguration {
+  channelName: string,
+  channelId: string,
   isTTSEnabled: boolean,
   chatDirection: 'left' | 'right',
   betterTTVEnabled: boolean,

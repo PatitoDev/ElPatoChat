@@ -11,10 +11,13 @@ import { ChatWithTwitch } from '../../components/chat/ChatWithTwitch';
 import { ChatVisualizerSettings } from './ChatVisualizerSettings.ts';
 import { TTSSettings } from './TTSSettings/index.tsx';
 import { UserReplacementSettings } from './UserReplacementSettings.ts/index.tsx';
+import { useConfiguration } from '../../store/configuration.ts';
 
 const HomePage = () => {
   const [channelDetails, setChannelDetails] = useState<UserInformation | null>(null);
-  const [channel, setChannel] = useState<string>('');
+  const channelId = useConfiguration(state => state.channelId);
+  const udpateConfiguration = useConfiguration(state => state.updateUserConfiguration);
+  const [channel, setChannel] = useState<string>(channelId);
   const debouncedChannel = useDebounce(channel, 500);
   const [messages, setMessages] = useState<Array<ChatMessageData>>([]);
 
@@ -23,10 +26,11 @@ const HomePage = () => {
       const user = await elPatoApi.getUserDetails(debouncedChannel);
       if (!user.data) return;
       setChannelDetails(user.data);
+      udpateConfiguration({ channelId: user.data.id, channelName: user.data.login });
     };
 
     getUserDetails();
-  }, [debouncedChannel]);
+  }, [debouncedChannel, udpateConfiguration]);
 
   useEffect(() => {
     const onInterval = () => {
@@ -65,6 +69,9 @@ const HomePage = () => {
               placeholder="Nombre de twitch"
             />
           </S.InputSection>
+          { channelId && (
+            <S.Info>You can copy the url into a obs source to render a chat overlay</S.Info>
+          )}
         </S.SettingSectionCard>
 
         <S.ChatSettings>

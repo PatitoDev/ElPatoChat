@@ -38,6 +38,8 @@ const ttsDefaultConfig: TTSConfiguration = {
 };
 
 export const defaultUserConfiguration: UserConfiguration = {
+  channelName: '',
+  channelId: '',
   ignoredUsers: [
     { id: crypto.randomUUID(), value: 'el_pato_bot' },
     { id: crypto.randomUUID(), value: 'nightbot' },
